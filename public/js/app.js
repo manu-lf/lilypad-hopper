@@ -226,6 +226,7 @@
         { t: 'li', c: [key('↓'), ' — hop back (once in a while it saves you)'] },
         { t: 'li', c: 'Each new row is +1. A fly is +5. Five new rows in quick succession: ribbit, +3.' },
         { t: 'li', c: 'The pond scrolls down and speeds up. Pads carry you sideways; off the edge is out.' },
+        { t: 'li', c: 'Grassy banks are safe: the pond waits while you rest, and reaching one is +5. After a still row of pads the next row always moves, so there is always a way forward.' },
         { t: 'li', c: 'Three lives. Lose one and you restart on the row you fell from; the score keeps.' },
         { t: 'li', c: [key('P'), ' pause · ', key('M'), ' mute · ', key('Esc'), ' pause and leave full screen'] }
       ] }

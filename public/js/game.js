@@ -54,13 +54,15 @@
     if (row) return row;
     if (r > 0 && !G.rows[r - 1]) rowAt(r - 1);
     var d = Math.min(1, r / 70);
-    if (r <= 1 || (r % 12 === 0 && r <= 48)) {
+    var isBank = r <= 1 || (r <= 48 ? r % 12 === 0 : r <= 100 ? (r - 48) % 16 === 0 : (r - 100) % 20 === 0);
+    if (isBank) {
       row = { r: r, kind: 'bank', y: -r * RH, reeds: [], pebbles: [] };
       for (var k = 0; k < 7; k++) row.reeds.push({ x: 12 + rnd() * (W - 24), h: 10 + rnd() * 14, lean: (rnd() - 0.5) * 8 });
       for (k = 0; k < 5; k++) row.pebbles.push({ x: rnd() * W, y: (rnd() - 0.5) * 30, r: 2 + rnd() * 2.5 });
     } else {
       var prev = G.rows[r - 1];
-      var still = rnd() < (0.26 - 0.2 * d);
+      var prevStill = prev && prev.kind === 'pads' && prev.speed === 0;   // never two still rows in a row: you could get stuck
+      var still = !prevStill && rnd() < (0.26 - 0.2 * d);
       var dir = (prev && prev.kind === 'pads' && prev.speed) ? -prev.dir : (rnd() < 0.5 ? -1 : 1);
       var n = d < 0.3 ? pick([4, 4, 3]) : d < 0.65 ? pick([3, 3, 4, 2]) : pick([3, 2, 2]);
       var speed = still ? 0 : (22 + 68 * d + rnd() * 26);
@@ -153,9 +155,10 @@
   function land() {
     var f = G.frog, h = f.hop, t = nowS();
     f.hop = null; f.row = h.row; f.x = h.toX; f.y = h.toY; f.lift = 0;
-    var row = rowAt(f.row);
+    var row = rowAt(f.row), newRow = f.row > G.maxRow;
     if (row.kind === 'bank') {
       f.pad = null; f.x = clamp(f.x, CW / 2, W - CW / 2);
+      if (newRow && row.r > 1) { G.score += 5; pop(f.x, f.y - 30, 'safe! +5', C.bonus); }
     } else {
       var hit = -1, bestD = 1e9;
       for (var i = 0; i < row.pads.length; i++) {
@@ -202,9 +205,10 @@
     // camera: auto-scroll (speeds up with score and time) plus a catch-up when the frog is ahead
     if (G.started) {
       G.auto = Math.min(100, 16 + G.score * 0.7 + G.t * 0.35);
+      var resting = !f.hop && rowAt(f.row).kind === 'bank';   // banks are safe: no push while you sit on one
       var target = f.y + H * 0.38;
       var eased = G.camBottom + (target - G.camBottom) * Math.min(1, 5 * dt);
-      G.camBottom = Math.min(G.camBottom - G.auto * dt, eased);
+      G.camBottom = Math.min(G.camBottom - (resting ? 0 : G.auto) * dt, eased);
     }
     if (f.hop) {
       var p = (t - f.hop.t0) / f.hop.dur;
@@ -251,6 +255,7 @@
     return svgItem('hop_bank', [
       { t: 'rect', a: { x: -10, y: y0 + 4, width: W + 20, height: RH - 4, fill: C.bank } },
       { t: 'rect', a: { x: -10, y: y0 - 2, width: W + 20, height: 9, rx: 4, fill: C.bankTop } },
+      row.r > 1 ? { t: 'text', a: { x: W - 12, y: fmt(row.y + 28), fill: C.reed, 'font-size': 11, 'font-weight': 700, 'text-anchor': 'end', opacity: 0.8, 'letter-spacing': '.08em', 'font-family': 'inherit' }, c: 'SAFE BANK' } : null,
       { t: 'g', c: row.pebbles.map(function (p) { return { t: 'circle', a: { cx: fmt(p.x), cy: fmt(row.y + 10 + p.y), r: fmt(p.r), fill: C.pebble, opacity: 0.8 } }; }) },
       { t: 'g', a: { stroke: C.reed, 'stroke-width': 2, 'stroke-linecap': 'round', opacity: 0.9 }, c: row.reeds.map(function (q) {
         return { t: 'path', a: { d: 'M' + fmt(q.x) + ',' + fmt(y0 + 6) + ' q' + fmt(q.lean) + ',' + fmt(-q.h / 2) + ' ' + fmt(q.lean * 1.4) + ',' + fmt(-q.h) } };
