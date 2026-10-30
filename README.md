@@ -39,6 +39,10 @@ This folder is the whole demo, and it is the standard Lilypad shape:
 - Leapfrog branding throughout: palette and logos from lftechnology.com, recorded in `public/assets/brand.md`.
 - Sample content only, nothing connected to a live system.
 
+## Play it
+
+Live on GitHub Pages: **https://manu-lf.github.io/lilypad-hopper/** (published from `public/` by `.github/workflows/pages.yml` on every push to `main`).
+
 ## Run it locally
 
 ```bash
