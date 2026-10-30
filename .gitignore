@@ -1,0 +1,17 @@
+.ssh/
+*.key
+*.key.pub
+*_deploy
+*_deploy.pub
+deploy_key
+deploy_key.pub
+id_ed25519*
+id_rsa*
+lilypad_*
+*.pem
+.env
+.env.local
+!.env.example
+node_modules/
+standalone.html
+.DS_Store

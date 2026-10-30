@@ -1,0 +1,12 @@
+node_modules
+.git
+.DS_Store
+*.md
+!public/assets/brand.md
+standalone.html
+*.cjs
+!demo-auth.cjs
+.ssh/
+*.key
+*.key.pub
+deploy.sh

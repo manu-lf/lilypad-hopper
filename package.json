@@ -1,0 +1,19 @@
+{
+  "name": "lilypad-hopper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Lilypad Hopper — a frog hopping game in bitwrench.js + SVG. Leapfrog Lilypad concept demo.",
+  "scripts": {
+    "start": "node server.js",
+    "serve:bw": "npx bwcli serve public --port 9933",
+    "debug": "npx bwcli attach --allow-screenshot",
+    "test": "node render-test.cjs",
+    "test:ui": "node ui-test.cjs",
+    "build:standalone": "node build-standalone.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
+}

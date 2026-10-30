@@ -1,0 +1,32 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>bitwrench SVG namespace repro</title>
+<!-- Run:  npx bwcli serve . --port 9940  (from the hopper folder)  then open http://localhost:9940/bitwrench-issue/svg-namespace-repro.html
+     Debug: bwcli attach   then open the page with ?attach  (connects to the REPL on 7902; /tree svg 3) -->
+<script src="../public/vendor/bitwrench.umd.min.js"></script>
+<body style="font:14px system-ui;margin:20px">
+<p>Expected: four green circles. Actual (bitwrench 2.1.11): only the first (part of the mounted tree) renders.
+The ones added afterwards with <code>syncChildren</code> / <code>append</code> / <code>patch</code> are created in the HTML namespace and draw nothing.</p>
+<div id="app"></div>
+<pre id="out"></pre>
+<script>
+  var SVG = 'http://www.w3.org/2000/svg';
+  bw.mount('#app', { t: 'svg', a: { id: 'svg', viewBox: '0 0 400 100', width: 400, height: 100, style: 'background:#eef' }, c: [
+    { t: 'circle', a: { id: 'c_mounted', cx: 50, cy: 50, r: 30, fill: '#038E43' } },   // 1: mounted tree -> SVG, renders
+    { t: 'g', a: { id: 'g_sync' } },
+    { t: 'g', a: { id: 'g_append' } },
+    { t: 'g', a: { id: 'g_patch' } }
+  ]});
+  bw.syncChildren(bw.el('g_sync'), [1], { key: function (x) { return x; },
+    create: function () { return { t: 'circle', a: { id: 'c_sync', cx: 150, cy: 50, r: 30, fill: '#038E43' } }; } }); // 2
+  bw.append(bw.el('g_append'), { t: 'circle', a: { id: 'c_append', cx: 250, cy: 50, r: 30, fill: '#038E43' } });     // 3
+  bw.patch('g_patch', { t: 'circle', a: { id: 'c_patch', cx: 350, cy: 50, r: 30, fill: '#038E43' } });              // 4
+  var lines = ['bitwrench ' + bw.version];
+  ['c_mounted', 'c_sync', 'c_append', 'c_patch'].forEach(function (id) {
+    var c = bw.el(id);
+    lines.push(id + ': <' + c.tagName + '> namespaceURI=' + c.namespaceURI + '  bbox.width=' + (c.getBBox ? c.getBBox().width : 'n/a (not an SVGElement)') + (c.namespaceURI === SVG ? '  ok' : '  WRONG'));
+  });
+  bw.el('out', lines.join('\n'));
+  var att = /[?&#]attach(?:=(\d+))?/.exec(location.search + location.hash);
+  if (att) bw.append(document.head, { t: 'script', a: { src: 'http://localhost:' + (att[1] || 7902) + '/bw/attach.js' } });
+</script>
